@@ -1,56 +1,63 @@
-/* 전반적인 레이아웃 */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    text-align: center;
-  }
-  
-  header {
-    background-color: #6c10f0;
-    padding: 20px;
-    color: white;
-  }
-  
-  h1 {
-    font-size: 2em;
-  }
-  
-  #video-list {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .video-item {
-    width: 100%;
-    max-width: 560px; /* 최대 너비 설정 */
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    background-color: white;
-    position: relative;
-    padding-top: 56.25%; /* 16:9 비율 */
-  }
-  
-  .video-item h2 {
-    font-size: 1.2em;
-    padding: 10px;
-  }
-  
-  .video-item iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-  
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #eceff1;
+  color: #333;
+  text-align: center;
+}
+
+header {
+  background-color: #5d8aa8;
+  padding: 20px;
+  color: white;
+}
+
+h1 {
+  font-size: 4em;
+  font-family: "Jua", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+#video-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.video-item {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 20px;
+  border: 2px solid #90a4ae;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  position: relative;
+  padding-top: 56.25%;
+  transition: transform 0.3s ease;
+}
+
+.video-item:hover {
+  transform: scale(1.03);
+}
+
+.video-item h2 {
+  font-size: 1.2em;
+  padding: 10px;
+  color: #455a64;
+}
+
+.video-item iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
