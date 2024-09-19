@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tracking memory</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        .hidden {
+            display: none;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        #map {
+            height: 60vh;
+            width: 100%;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 10px;
+        }
+        .control-btn, .control-input {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .control-input {
+            width: 80%;
+            max-width: 300px;
+        }
+        #search-container, #name-container {
+            display: none;
+            text-align: center;
+            margin: 10px;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const map = L.map('map').setView([37.5665, 126.9780], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            let addingMarkerMode = false;
+            const markers = [];
+            let currentMarker = null; 
+
+            function createCustomIcon(iconUrl) {
+                return L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32], 
+                    popupAnchor: [0, -32]
+                });
+            }
+
+            function getCurrentLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        map.setView([lat, lng], 12);
+                    }, () => {
+                        alert("현재 위치를 가져오는 데 실패했습니다.");
+                    });
+                } else {
+                    alert("이 브라우저는 Geolocation을 지원하지 않습니다.");
+                }
+            }
+
+            document.getElementById('current-location-btn').addEventListener('click', getCurrentLocation);
+
+            const geocoder = L.Control.Geocoder.nominatim();
+            const searchContainer = document.getElementById('search-container');
+            const searchInput = document.getElementById('search-input');
+            const nameContainer = document.getElementById('name-container');
+            const nameInput = document.getElementById('name-input');
+            const saveNameBtn = document.getElementById('save-name-btn');
+
+            document.getElementById('search-btn').addEventListener('click', () => {
+                searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value;
+                    geocoder.geocode(query, (results) => {
+                        if (results.length > 0) {
+                            const bbox = results[0].bbox;
+                            const center = results[0].center;
+
+                            const customIcon = createCustomIcon('akzj.png');
+                            const newMarker = L.marker(center, { icon: customIcon })
+                                .bindPopup(searchInput.value) 
+                                .addTo(map);
+                            markers.push(newMarker);
+                            saveMarkersToLocalStorage(); 
+
+                            map.fitBounds(bbox);
+
+                            searchContainer.style.display = 'none';
+                            nameContainer.style.display = 'block';
+
+                            newMarker.on('click', () => {
+                                currentMarker = newMarker;
+                                nameContainer.style.display = 'block';
+                            });
+                        } else {
+                            alert("위치를 찾을 수 없습니다.");
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('add-marker-btn').addEventListener('click', () => {
+                addingMarkerMode = true;
+                map.once('click', (e) => {
+                    if (addingMarkerMode) {
+                        const customIcon = createCustomIcon('akzj.png');
+                        const newMarker = L.marker(e.latlng, { icon: customIcon })
+                            .bindPopup(nameInput.value)
+                            .addTo(map);
+                        markers.push(newMarker);
+                        addingMarkerMode = false;
+                        nameContainer.style.display = 'block';
+                        saveMarkersToLocalStorage();
+
+                        newMarker.on('click', () => {
+                            currentMarker = newMarker;
+                            nameContainer.style.display = 'block';
+                        });
+                    }
+                });
+            });
+
+            saveNameBtn.addEventListener('click', () => {
+                if (currentMarker) {
+                    const name = nameInput.value;
+                    if (name) {
+                        currentMarker.setPopupContent(name);
+                        nameInput.value = ''; 
+                        nameContainer.style.display = 'none'; 
+                        saveMarkersToLocalStorage();
+                    } else {
+                        alert("이름을 입력해 주세요.");
+                    }
+                } else {
+                    alert("마커가 없습니다.");
+                }
+            });
+
+            document.getElementById('clear-markers-btn').addEventListener('click', () => {
+                markers.forEach(marker => map.removeLayer(marker));
+                markers.length = 0; 
+                localStorage.removeItem('markers');
+            });
+
+            function saveMarkersToLocalStorage() {
+                const markerData = markers.map(marker => ({
+                    lat: marker.getLatLng().lat,
+                    lng: marker.getLatLng().lng,
+                    popup: marker.getPopup() ? marker.getPopup().getContent() : ''
+                }));
+                localStorage.setItem('markers', JSON.stringify(markerData));
+            }
+
+            function loadMarkersFromLocalStorage() {
+                const markerData = JSON.parse(localStorage.getItem('markers')) || [];
+                markerData.forEach(data => {
+                    const customIcon = createCustomIcon('akzj.png');
+                    const marker = L.marker([data.lat, data.lng], { icon: customIcon })
+                        .bindPopup(data.popup)
+                        .addTo(map);
+                    markers.push(marker);
+                });
+            }
+
+            loadMarkersFromLocalStorage();
+
+            map.on('popupopen', (e) => {
+                const popup = e.popup;
+                popup.options.autoClose = false; 
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1 style="text-align: center;">주변 복지관 및 병원</h1>
+    <div class="controls">
+        <button id="current-location-btn" class="control-btn">현재 위치</button>
+        <button id="search-btn" class="hidden">검색</button>
+    </div>
+    <div id="search-container">
+        <input id="search-input" class="control-input" type="text" placeholder="위치 입력 후 Enter">
+    </div>
+    <div id="name-container">
+        <input id="name-input" class="control-input" type="text" placeholder="마커 이름 입력">
+        <button id="save-name-btn" class="control-btn">이름 저장</button>
+    </div>
+    <div id="map"></div>
+    <button id="add-marker-btn" class="hidden">마커 추가</button>
+    <button id="clear-markers-btn" class="hidden">전체 삭제</button>
+    <!-- 이건 css 디스플레이 넌 풀어서 마커 추가할때 사용하세요 필요없을거 같아서 주석처리함 -->
+</body>
+</html>
