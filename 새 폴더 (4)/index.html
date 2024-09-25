@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>답도없다</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🎶 음악 기억 게임 🎶</h1>
+    </header>
+    
+    <div class="selection">
+      <label for="era">연도 선택</label>
+      <select id="era" class="dropdown">
+        <option value="60s">1960년대</option>
+        <option value="70s">1970년대</option>
+        <option value="80s">1980년대</option>
+        <option value="90s">1990년대</option>
+        <option value="2000s">2000년대</option>
+        <option value="2010s">2010년대</option>
+        <option value="2020s">2020년대</option>
+      </select>
+
+      <label for="genre">장르 선택</label>
+      <select id="genre" class="dropdown">
+        <option value="pop">팝</option>
+        <option value="ballad">발라드</option>
+        <option value="hiphop">힙합</option>
+        <option value="rnb">R&B</option>
+        <option value="trot">트로트</option>
+        <option value="dance">댄스</option>
+      </select>
+    </div>
+
+    <div class="buttons">
+      <button id="playMusic" class="btn-primary">음악 듣기</button>
+      <button id="listenAgain" class="btn-secondary" disabled>다시 듣기</button>
+    </div>
+
+    <div id="answerSection" class="answer-section hidden">
+      <label for="artist">가수 이름:</label>
+      <input type="text" id="artist" class="input-text" placeholder="가수 이름 입력">
+      
+      <label for="song">노래 제목:</label>
+      <input type="text" id="song" class="input-text" placeholder="노래 제목 입력">
+      
+      <button id="submitAnswer" class="btn-submit">정답 제출</button>
+      <div id="videoContainer"></div>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/OX0XWuYQ8XE?si=DO1CjwKc3G9_YjVL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>  
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
